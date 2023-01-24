@@ -12,10 +12,13 @@ function formatBytes(bytes, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
-export const Preview = ({ url, onDelete, title, size }) => {
+export const Preview = ({ onDelete, image }) => {
+  const { url, name, size } = image;
+
   return (
     <div className={styles.preview}>
-      <div className={styles.delete} onClick={() => onDelete(url)}>
+      {image.ref && <span className={styles.badge}>В облаке</span>}
+      <div className={styles.delete} onClick={() => onDelete(image)}>
         x
       </div>
       <img
@@ -26,7 +29,7 @@ export const Preview = ({ url, onDelete, title, size }) => {
         src={url}
       />
 
-      <div className={styles.title}>{title}</div>
+      <div className={styles.title}>{name}</div>
 
       <div>{formatBytes(size)}</div>
     </div>

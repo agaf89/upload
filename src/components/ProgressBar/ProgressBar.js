@@ -7,11 +7,15 @@ export const ProgressBar = ({ percentage }) => {
   if (!percentage) {
     return null;
   }
+
   return (
     <div className={styles.ProgressBar}>
-      <div ref={ref} style={{}} className={styles.percentage}>
-        {percentage}%
-      </div>
+      <span>{Math.floor(percentage)}%</span>
+      <div
+        ref={ref}
+        style={{ width: percentage + "%" }}
+        className={styles.percentage}
+      ></div>
     </div>
   );
 };

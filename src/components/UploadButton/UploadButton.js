@@ -30,7 +30,7 @@ const storage = getStorage(app);
 export const UploadButton = () => {
   const inputRef = useRef(null);
   const [images, setImages] = useState([]);
-  const [totalSize, setTotalSize] = useState({ total: 0, current: 0 });
+  const [size, setSize] = useState();
 
   const getUploadedImages = async () => {
     const listRef = ref(storage, "image/");
@@ -69,6 +69,9 @@ export const UploadButton = () => {
     files.forEach((file) => {
       const fileReader = new FileReader();
       fileReader.onload = (a) => {
+        // setSize((prev) => {
+        //   return { ...prev, total: files.length * 100 };
+        // });
         setImages((prev) => {
           return [
             ...prev,
@@ -99,11 +102,12 @@ export const UploadButton = () => {
   };
 
   const handleUpload = () => {
-    const a = images.reduce((prev, image) => {
-      return prev + image.size;
-    }, 0);
+    const filtered = images.filter((image) => !image.ref);
+    setSize(filtered.map((image) => ({ id: image.id, loaded: 0 })));
+
     for (const image of images) {
       if (!image.ref) {
+        image.loaded = 0;
         const storageRef = ref(storage, "image/" + image.name);
 
         const uploadTask = uploadBytesResumable(storageRef, image.file, {
@@ -115,7 +119,19 @@ export const UploadButton = () => {
         uploadTask.on(
           "state_changed",
           (snapshot) => {
-            console.log(snapshot);
+            setSize((prev) => {
+              return prev.map((_image) => {
+                if (_image.id === image.id) {
+                  return {
+                    ..._image,
+                    loaded:
+                      (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
+                  };
+                }
+
+                return _image;
+              });
+            });
           },
           (error) => {
             console.error(error);
@@ -138,6 +154,23 @@ export const UploadButton = () => {
     }
   };
 
+  const getPercentage = () => {
+    if (!size) {
+      return 0;
+    }
+    const loaded = size.reduce((sum, image) => {
+      return sum + image.loaded;
+    }, 0);
+
+    const maxSize = size.length * 100;
+
+    if (loaded === maxSize) {
+      return 0;
+    }
+
+    return (loaded * 100) / maxSize;
+  };
+
   return (
     <div className={styles.uploader}>
       <div className={styles.wrapper}>
@@ -156,7 +189,7 @@ export const UploadButton = () => {
         </Button>
       </div>
 
-      {/* <ProgressBar percentage={percentage} /> */}
+      <ProgressBar percentage={getPercentage()} />
 
       {images && (
         <div className={styles.imagesWrapper}>

@@ -16,7 +16,7 @@
 .imagesWrapper {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: 150px;
-    column-gap: 10px;
+
+    gap: 10px;
 }
 

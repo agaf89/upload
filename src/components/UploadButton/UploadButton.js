@@ -102,8 +102,7 @@ export const UploadButton = () => {
   };
 
   const handleUpload = () => {
-    const filtered = images.filter((image) => !image.ref);
-    setSize(filtered.map((image) => ({ id: image.id, loaded: 0 })));
+    const total = [];
 
     for (const image of images) {
       if (!image.ref) {
@@ -119,56 +118,70 @@ export const UploadButton = () => {
         uploadTask.on(
           "state_changed",
           (snapshot) => {
-            setSize((prev) => {
+            setImages((prev) => {
               return prev.map((_image) => {
+                let temp;
                 if (_image.id === image.id) {
-                  return {
+                  temp = {
                     ..._image,
                     loaded:
                       (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
                   };
                 }
 
-                return _image;
+                if (
+                  _image.id === image.id &&
+                  snapshot.bytesTransferred === snapshot.totalBytes
+                ) {
+                  temp = { ...temp, ref: storageRef, done: true };
+                }
+
+                return temp || _image;
               });
             });
           },
           (error) => {
             console.error(error);
-          },
-          () => {
-            setImages((prev) => {
-              return [
-                ...prev.map((_image) => {
-                  if (_image.id === image.id) {
-                    return { ..._image, ref: storageRef };
-                  }
-
-                  return _image;
-                }),
-              ];
-            });
           }
+          // () => {
+          //   setImages((prev) => {
+          //     return prev.map((_image) => ({ ..._image, loaded: undefined }));
+          //   });
+          // }
         );
       }
     }
   };
 
   const getPercentage = () => {
-    if (!size) {
+    const filtered = images.filter((image) => image.loaded);
+
+    if (!filtered.length) {
       return 0;
     }
-    const loaded = size.reduce((sum, image) => {
+
+    const currentSize = filtered.reduce((sum, image) => {
       return sum + image.loaded;
     }, 0);
 
-    const maxSize = size.length * 100;
-
-    if (loaded === maxSize) {
+    if (!currentSize) {
       return 0;
     }
 
-    return (loaded * 100) / maxSize;
+    const maxSize = filtered.length * 100;
+
+    if (currentSize === maxSize) {
+      setImages((prev) => {
+        return prev.map((_image) => ({
+          ..._image,
+          done: undefined,
+          loaded: undefined,
+        }));
+      });
+      return 0;
+    }
+
+    return (currentSize * 100) / maxSize;
   };
 
   return (

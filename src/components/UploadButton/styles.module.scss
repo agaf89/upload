@@ -1,0 +1,22 @@
+.uploader {
+    display: grid;;
+    row-gap: 20px;
+}
+
+.input {
+    display: none;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: flex-end;
+    column-gap: 20px;
+}
+
+.imagesWrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 150px;
+    column-gap: 10px;
+}
+

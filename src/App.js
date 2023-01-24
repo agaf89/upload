@@ -1,5 +1,19 @@
-import "./app.module.scss";
+import styles from "./app.module.scss";
+import { UploadButton } from "./components/UploadButton";
+import { Button } from "./components/Button";
 
 export function App() {
-  return <div className="App">f</div>;
+  const handleClick = (e) => {
+    console.log(e);
+  };
+  const handleUpload = (e) => {
+    console.log(e.target.files);
+  };
+  return (
+    <div className={styles.App}>
+      <div className={styles.container}>
+        <UploadButton />
+      </div>
+    </div>
+  );
 }

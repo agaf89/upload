@@ -14,23 +14,23 @@ import {
   deleteObject,
   uploadBytesResumable,
 } from "firebase/storage";
+import env from "react-dotenv";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDc-d00SYx74gXx79vc8tSfDbVeTfI4AG8",
-  authDomain: "upload-63e17.firebaseapp.com",
-  projectId: "upload-63e17",
-  storageBucket: "upload-63e17.appspot.com",
-  messagingSenderId: "795292058029",
-  appId: "1:795292058029:web:3b42d5e347e2e8bbdea124",
+  apiKey: env.API_KEY,
+  authDomain: env.AUTH_DOMAIN,
+  projectId: env.PROJECT_ID,
+  storageBucket: env.STORAGE_BUCKET,
+  messagingSenderId: env.SENDER_ID,
+  appId: env.APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 
-export const UploadButton = () => {
+export const Upload = () => {
   const inputRef = useRef(null);
   const [images, setImages] = useState([]);
-  const [size, setSize] = useState();
 
   const getUploadedImages = async () => {
     const listRef = ref(storage, "image/");
@@ -59,19 +59,12 @@ export const UploadButton = () => {
     getUploadedImages();
   }, []);
 
-  const handleClick = () => {
-    inputRef.current.click();
-  };
-
   const handleSelect = (e) => {
     const files = Array.from(e.target.files);
 
     files.forEach((file) => {
       const fileReader = new FileReader();
       fileReader.onload = (a) => {
-        // setSize((prev) => {
-        //   return { ...prev, total: files.length * 100 };
-        // });
         setImages((prev) => {
           return [
             ...prev,
@@ -102,8 +95,6 @@ export const UploadButton = () => {
   };
 
   const handleUpload = () => {
-    const total = [];
-
     for (const image of images) {
       if (!image.ref) {
         image.loaded = 0;
@@ -124,8 +115,7 @@ export const UploadButton = () => {
                 if (_image.id === image.id) {
                   temp = {
                     ..._image,
-                    loaded:
-                      (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
+                    loaded: snapshot.bytesTransferred,
                   };
                 }
 
@@ -143,11 +133,6 @@ export const UploadButton = () => {
           (error) => {
             console.error(error);
           }
-          // () => {
-          //   setImages((prev) => {
-          //     return prev.map((_image) => ({ ..._image, loaded: undefined }));
-          //   });
-          // }
         );
       }
     }
@@ -168,7 +153,9 @@ export const UploadButton = () => {
       return 0;
     }
 
-    const maxSize = filtered.length * 100;
+    const maxSize = filtered.reduce((sum, image) => {
+      return sum + image.size;
+    }, 0);
 
     if (currentSize === maxSize) {
       setImages((prev) => {
@@ -195,16 +182,25 @@ export const UploadButton = () => {
           ref={inputRef}
           className={styles.input}
         />
-        <Button onClick={handleClick}>Выбрать</Button>
+        <Button
+          disabled={Boolean(getPercentage())}
+          onClick={() => inputRef.current.click()}
+        >
+          Выбрать
+        </Button>
 
-        <Button onClick={handleUpload} theme="primary">
+        <Button
+          disabled={Boolean(getPercentage())}
+          onClick={handleUpload}
+          theme="primary"
+        >
           Загрузить
         </Button>
       </div>
 
       <ProgressBar percentage={getPercentage()} />
 
-      {images && (
+      {images.length > 0 ? (
         <div className={styles.imagesWrapper}>
           {images.map((image) => {
             return (
@@ -212,6 +208,8 @@ export const UploadButton = () => {
             );
           })}
         </div>
+      ) : (
+        <div style={{ textAlign: "center" }}>Нет данных</div>
       )}
     </div>
   );

@@ -21,13 +21,13 @@ export const Preview = ({ onDelete, image }) => {
       <div className={styles.delete} onClick={() => onDelete(image)}>
         x
       </div>
-      <img className={styles.image} alt="2" src={url} />
-
-      <div>
-        <div className={styles.title}>{name}</div>
-
-        <div>{formatBytes(size)}</div>
+      <div className={styles.wrapperImage}>
+        <img className={styles.image} alt="2" src={url} />
       </div>
+
+      <div className={styles.title}>{name}</div>
+
+      <div style={{ textAlign: "end" }}>{formatBytes(size)}</div>
     </div>
   );
 };

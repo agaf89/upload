@@ -64,7 +64,7 @@ export const Upload = () => {
 
     files.forEach((file) => {
       const fileReader = new FileReader();
-      fileReader.onload = (a) => {
+      fileReader.onload = () => {
         setImages((prev) => {
           return [
             ...prev,
@@ -123,7 +123,7 @@ export const Upload = () => {
                   _image.id === image.id &&
                   snapshot.bytesTransferred === snapshot.totalBytes
                 ) {
-                  temp = { ...temp, ref: storageRef, done: true };
+                  temp = { ...temp, ref: storageRef };
                 }
 
                 return temp || _image;
@@ -161,7 +161,6 @@ export const Upload = () => {
       setImages((prev) => {
         return prev.map((_image) => ({
           ..._image,
-          done: undefined,
           loaded: undefined,
         }));
       });
